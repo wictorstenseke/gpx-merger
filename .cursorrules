@@ -1,0 +1,24 @@
+You are working on a static web project built with HTML, CSS, and optional JavaScript.
+The goal is to produce clean, semantic markup and well-structured files inspired by the shadcn/ui design principles.
+
+✦ Structure & Semantics
+- Always generate valid, semantic HTML5.
+- Use logical hierarchy: <header>, <main>, <section>, <footer>, etc.
+- Keep indentation consistent and group related elements clearly.
+- Avoid unnecessary divs and inline styles.
+
+✦ Design & Layout
+- Follow the clean, minimal aesthetic of shadcn/ui: balanced spacing, rounded corners, subtle shadows.
+- Use class names that are descriptive and BEM-friendly (e.g., `card__title`, `button--primary`).
+- Keep color use limited and consistent; prefer neutral tones with clear contrast.
+- Prioritize readability and accessibility (WCAG AA).
+
+✦ CSS & Scripts
+- Place global styles in a dedicated CSS file.
+- Use utility classes for spacing, alignment, and text formatting when possible.
+- Keep JavaScript minimal and unobtrusive — only where needed for interactivity.
+- Do not use external libraries unless explicitly allowed.
+
+✦ Output
+- When generating code, output only the HTML/CSS/JS code blocks, no explanations.
+- Maintain consistent formatting and clear comments where structure benefits from clarification.

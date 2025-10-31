@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GPX Merger</title>
+    <link rel="stylesheet" href="styles.css">
+    <link
+        rel="stylesheet"
+        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+        crossorigin=""
+    >
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="min-h-screen">
+    <header class="header bg-transparent shadow-none">
+        <div class="max-w-4xl mx-auto px-4 py-6 text-center">
+            <div class="flex items-center justify-center gap-2">
+                <span class="inline-flex items-center rounded-full bg-white/60 px-3 py-1 text-xs font-medium text-gray-700 shadow-sm backdrop-blur">GPX → Merge</span>
+            </div>
+            <h1 class="header__title text-3xl md:text-4xl font-bold mt-3">GPX Merger</h1>
+            <p class="mt-2 text-gray-200">Convert multiple GPX tracks into one and preview the route instantly.</p>
+        </div>
+    </header>
+    <main class="main">
+        <div class="max-w-4xl mx-auto px-4">
+            <section id="upload-section" class="section bg-white rounded-2xl shadow-xl p-6 md:p-8">
+                <h2 id="upload-title" class="section__title text-xl font-semibold">Merge Your GPX Files</h2>
+                <div id="dropzone" class="mt-4 border-2 border-dashed border-gray-300 rounded-xl bg-gray-50 p-8 text-center hover:border-blue-400 transition-colors cursor-pointer">
+                    <p class="mt-3 text-sm text-gray-700">Drop GPX files here or click to browse</p>
+                    <button type="button" id="browse-btn" class="mt-3 inline-flex items-center rounded-md bg-blue-600 px-3 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700">Browse files</button>
+                    <input type="file" id="gpx-files" name="gpx-files" accept=".gpx" multiple class="sr-only" aria-hidden="true">
+                    <p class="mt-2 text-xs text-gray-600">Files are merged automatically. We'll show a preview and map below.</p>
+                </div>
+                <div id="result-section" class="grid md:grid-cols-2 gap-6 u-hidden">
+                    <!-- Row 1, Col 1: Map -->
+                    <section class="section map bg-white p-0 shadow-none" style="margin-top: 0;">
+                        <h2 class="section__title text-base font-medium" style="margin-top: 0;">Map</h2>
+                        <div id="map" class="map__canvas mt-2" aria-label="Merged route map"></div>
+                    </section>
+                    
+                    <!-- Row 1, Col 2: Data -->
+                    <section class="section data bg-white p-0 shadow-none" style="margin-top: 0;" aria-live="polite">
+                        <div class="flex items-center justify-between">
+                            <h2 class="section__title text-base font-medium" style="margin-top: 0;">Data</h2>
+                            <div class="flex gap-1">
+                                <button id="mode-bike" class="activity-mode-btn activity-mode-btn--active" aria-label="Cycling mode" title="Cycling mode">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <circle cx="18.5" cy="17.5" r="3.5"/>
+                                        <circle cx="5.5" cy="17.5" r="3.5"/>
+                                        <circle cx="15" cy="5" r="1"/>
+                                        <path d="M12 17.5V14l-3-3 4-3 2 3h2"/>
+                                    </svg>
+                                </button>
+                                <button id="mode-run" class="activity-mode-btn" aria-label="Running mode" title="Running mode">
+                                    <svg width="18" height="18" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
+                                        <path d="m20.21875 5c-1.679687 0-3.0625 1.382813-3.0625 3.0625 0 1.679688 1.382813 3.0625 3.0625 3.0625 1.683594 0 3.09375-1.382812 3.09375-3.0625 0-1.679687-1.410156-3.0625-3.09375-3.0625zm0 2c.601563 0 1.09375.464844 1.09375 1.0625s-.492187 1.0625-1.09375 1.0625c-.597656 0-1.0625-.460937-1.0625-1.0625 0-.597656.464844-1.0625 1.0625-1.0625zm-7.28125 2c-.480469.058594-.964844.28125-1.3125.65625l-3.375 3.65625 1.5 1.375 3.34375-3.65625c.035156-.035156.082031-.058594.125-.03125l1.59375 1.0625-2.34375 3.25c-.734375 1.03125-.613281 2.449219.28125 3.34375l3.53125 3.53125-2.90625 5.8125h2.25l2.46875-4.90625c.386719-.769531.234375-1.703125-.375-2.3125l-3.53125-3.53125c-.203125-.203125-.230469-.546875-.0625-.78125l2.34375-3.28125.8125.53125 1.59375 2.40625c.371094.554688.988281.875 1.65625.875h4.46875v-2h-4.46875l-1.6875-2.5625-.125-.15625-.15625-.125-4.21875-2.8125c-.425781-.285156-.925781-.402344-1.40625-.34375zm-.875 10.53125-1.46875 1.46875h-4.59375v2h4.59375c.527344 0 1.03125-.214844 1.40625-.59375l1.46875-1.46875z"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                        <div id="data-summary" class="preview__content mt-2"></div>
+                        <div class="mt-3">
+                            <label for="filename-input" class="block text-xs font-medium text-gray-700 mb-1">Filename (editable)</label>
+                            <input type="text" id="filename-input" class="filename-input w-full rounded-md border-2 border-blue-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200" placeholder="merged-activity" value="merged-activity">
+                        </div>
+                        <button id="download-btn" class="button--primary mt-3 w-full" type="button" disabled>Download Merged GPX</button>
+                        <button id="reupload-btn" class="button--secondary mt-2 w-full u-hidden" type="button">Upload new files</button>
+                    </section>
+                    
+                    <!-- Row 2, Col 1: Heart Rate -->
+                    <section class="section heart-rate bg-white p-0 shadow-none" style="margin-top: 0;">
+                        <h2 class="section__title text-base font-medium" style="margin-top: 0;">Heart Rate</h2>
+                        <div id="hr-chart" class="hr-chart mt-2" aria-label="Heart rate chart"></div>
+                    </section>
+                    
+                    <!-- Row 2, Col 2: Merged files -->
+                    <section id="merged-files-section" class="section bg-white p-0 shadow-none u-hidden" style="margin-top: 0;">
+                        <h2 class="section__title text-base font-medium" style="margin-top: 0;">Merged files</h2>
+                        <div id="merged-files-list" class="text-sm text-gray-700 mt-2"></div>
+                    </section>
+                </div>
+            </section>
+            <div id="demo-btn-container" class="text-center mt-6">
+                <button type="button" id="demo-btn" class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium bg-white/20 backdrop-blur-sm border border-white/30 text-gray-100 rounded-md hover:bg-white/30 transition-all">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5">
+                        <path fill-rule="evenodd" d="M4.5 5.653c0-1.427 1.529-2.33 2.779-1.643l11.54 6.347c1.295.712 1.295 2.573 0 3.286L7.28 19.99c-1.25.687-2.779-.217-2.779-1.643V5.653Z" clip-rule="evenodd" />
+                    </svg>
+                    Try it out with demo files
+                </button>
+            </div>
+            <p class="text-center text-xs text-gray-300 mt-4">Built in your browser • No uploads • OpenStreetMap + Leaflet</p>
+        </div>
+    </main>
+    <footer class="footer bg-transparent">
+        <p class="footer__text">&copy; 2025 wictorstenseke.se</p>
+    </footer>
+    <script
+        src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+        crossorigin=""
+        defer
+    ></script>
+    <script src="script.js" defer></script>
+</body>
+</html>
