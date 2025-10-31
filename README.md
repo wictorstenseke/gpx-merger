@@ -72,6 +72,7 @@ open index.html
 
 ```
 gpx-merger/
+├── demo/               # Demo GPX files for testing
 ├── index.html          # Main HTML structure
 ├── styles.css          # Styling (shadcn/ui inspired design)
 ├── script.js           # Core functionality and GPX processing
