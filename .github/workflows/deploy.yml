@@ -25,13 +25,73 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Validate HTML
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libxml2-utils
+          xmllint --html --noout index.html
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install minification tools
+        run: |
+          npm install -g html-minifier-terser terser clean-css-cli
+
+      - name: Create build directory
+        run: mkdir -p build/demo
+
+      - name: Minify HTML
+        run: |
+          html-minifier-terser \
+            --collapse-whitespace \
+            --remove-comments \
+            --minify-js true \
+            --minify-css true \
+            index.html -o build/index.html
+
+      - name: Minify CSS
+        run: |
+          cleancss -o build/styles.css styles.css
+
+      - name: Minify JavaScript
+        run: |
+          terser script.js \
+            --compress \
+            --mangle \
+            -o build/script.js
+
+      - name: Minify GPX demo files
+        run: |
+          xmllint --noblanks demo/vargarda-cycling.gpx -o build/demo/vargarda-cycling.gpx
+          xmllint --noblanks demo/resume-after-coffee-break.gpx -o build/demo/resume-after-coffee-break.gpx
+          xmllint --noblanks demo/continue-after-puncture.gpx -o build/demo/continue-after-puncture.gpx
+
+      - name: Copy README
+        run: cp README.md build/
+
+      - name: Size comparison
+        run: |
+          echo "📊 Original sizes:"
+          du -h index.html styles.css script.js demo/*.gpx
+          echo ""
+          echo "📦 Minified sizes:"
+          du -h build/index.html build/styles.css build/script.js build/demo/*.gpx
+          echo ""
+          echo "💾 Total original:"
+          du -sh .
+          echo "💾 Total build:"
+          du -sh build/
+
       - name: Setup Pages
         uses: actions/configure-pages@v4
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: '.'
+          path: 'build'
 
       - name: Deploy to GitHub Pages
         id: deployment
